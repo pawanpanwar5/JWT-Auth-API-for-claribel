@@ -6,7 +6,7 @@ public class RegisterRequest {
     private String username;
     private String password;
     private String phoneNumber;
-    private Long defaultRoleId;
+    //private Long defaultRoleId;
 
     // --- Getters and Setters ---
     public String getName() {
@@ -49,11 +49,11 @@ public class RegisterRequest {
         this.phoneNumber = phoneNumber;
     }
 
-    public Long getDefaultRoleId() {
-        return defaultRoleId;
-    }
-
-    public void setDefaultRoleId(Long defaultRoleId) {
-        this.defaultRoleId = defaultRoleId;
-    }
+//    public Long getDefaultRoleId() {
+//        return defaultRoleId;
+//    }
+//
+//    public void setDefaultRoleId(Long defaultRoleId) {
+//        this.defaultRoleId = defaultRoleId;
+//    }
 }

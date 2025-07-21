@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 @Component
 @Slf4j
@@ -37,6 +38,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         final String jwt;
         final String userEmail;
 
+        String path = request.getRequestURI();
+        boolean isWhitelisted = WHITELIST.stream().anyMatch(path::startsWith);
+
+        if (isWhitelisted) {
+            filterChain.doFilter(request, response);
+            return;
+        }
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
@@ -58,4 +66,16 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, response);
     }
+
+    // Whitelist of public endpoints
+    private static final List<String> WHITELIST = List.of(
+            "/api/auth/register",
+            "/api/auth/send-otp",
+            "/api/auth/verify-otp",
+            "/api/auth/login",
+            "/swagger-ui",
+            "/v3/api-docs",
+            "/h2-console"
+    );
+
 }

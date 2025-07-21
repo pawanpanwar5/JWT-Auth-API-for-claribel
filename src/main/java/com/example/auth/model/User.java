@@ -1,25 +1,45 @@
 package com.example.auth.model;
 
 import jakarta.persistence.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
-public class User {
+public class User implements UserDetails, Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private Long userId;
 
     private String name;
+
+    @Column(name = "email_id")
     private String emailId;
+
     private String username;
+
     private String password;
+
+    @Column(name = "phone_number", unique = true)
     private String phoneNumber;
-    private Long defaultRoleId;
+
     private Boolean active;
+
     private Boolean verified;
 
-    // Getters and Setters
+    // ✅ Only keep the proper mapping to Role
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "default_role_id", referencedColumnName = "id", nullable = false)
+    private Role defaultRole;
+
+    // === Getters & Setters ===
 
     public Long getUserId() {
         return userId;
@@ -45,6 +65,7 @@ public class User {
         this.emailId = emailId;
     }
 
+    @Override
     public String getUsername() {
         return username;
     }
@@ -53,6 +74,7 @@ public class User {
         this.username = username;
     }
 
+    @Override
     public String getPassword() {
         return password;
     }
@@ -69,14 +91,6 @@ public class User {
         this.phoneNumber = phoneNumber;
     }
 
-    public Long getDefaultRoleId() {
-        return defaultRoleId;
-    }
-
-    public void setDefaultRoleId(Long defaultRoleId) {
-        this.defaultRoleId = defaultRoleId;
-    }
-
     public Boolean getActive() {
         return active;
     }
@@ -91,5 +105,40 @@ public class User {
 
     public void setVerified(Boolean verified) {
         this.verified = verified;
+    }
+
+    public Role getDefaultRole() {
+        return defaultRole;
+    }
+
+    public void setDefaultRole(Role defaultRole) {
+        this.defaultRole = defaultRole;
+    }
+
+    // === UserDetails Implementation ===
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority(defaultRole.getName())); // e.g., "ROLE_USER"
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return active != null && active;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return active != null && active;
     }
 }
